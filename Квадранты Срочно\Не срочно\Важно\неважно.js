@@ -6,51 +6,79 @@ const STOP_WORD = '.'
 const taskImportance = {[task]: importance };
 const taskUrgency = {[task]: urgency };
 
-function toNumbers(importance, urgency) 
-{if (importance === true) { importance = 1 }
-else if (importance === false) { importance = 2 }
-if (urgency === true) { urgency = 1 }
-else if (urgency === false) { urgency = 2 };
-taskImportance[task]= importance; 
-taskUrgency[task] = urgency;
-return taskImportance, taskUrgency;
-};
 
 while(true) {task = prompt('Введи свое дело');
 if (task==='.'){break};
-importance = confirm('Оно важное?');
-urgency = confirm('Оно срочное?');
-toNumbers(importance, urgency);}
+taskImportance[task] = confirm('Оно важное?');
+taskUrgency[task] = confirm('Оно срочное?');
+taskImportance.task = task;
+taskUrgency.task = task;}
 
-//подсчетики всякие
-let numbersEven; 
-function even (c){numbersEven= Object.values(c).filter(even => even%2===0);
-return numbersEven}
-function evenNot (c){numbersEven= Object.values(c).filter(even => even%2!==0);
-   return numbersEven}
+//разделение на только важно, только не важно, только срочное и только не срочное
 
+let  onlyImportant=null;
+let  onlyNotImportant=null;
+let  onlyUrgent=null;
+let  onlyNotUrgent=null;
+function filtration (notFiltered,value) {
+ let filteredInArr =[];
+ let filtered ={};
+ for (let prop in notFiltered)
+ { if(notFiltered.hasOwnProperty(prop)&&notFiltered[prop]===value) 
+ { filteredInArr.push({prop:prop, value:notFiltered[prop]});}
+  filtered = filteredInArr.reduce((obj,item)=>{obj[item.prop]=item.value;
+return obj;}, {});
+}
+return filtered;
+}
 
-const urgent = evenNot(taskUrgency).reduce((sum, Value)=>sum+Value, 0);
-const notUrgent = even(taskUrgency).reduce((sum, Value)=>sum+Value, 0)/2;
-const important = evenNot(taskImportance).reduce((sum, Value)=>sum+Value, 0);
-const notImportant = even(taskImportance).reduce((sum, Value)=>sum+Value, 0)/2;
-
-//Результаты (блин, я не сделала варианты с равно, да? (спустя еще 10 минут):бляяяя я вообще не так всю логику вычислений построила. надо было их вообще по 4ем квадрантам сразу рассортировать, а потом уже выдавать раезультаты в каком квадранте чел больше всего времени проводит)
-
-if (urgent<notUrgent && important>notImportant){console.log('Огонь! Ты больше всего работаешь в самом клевом и правильном квадранте не срочно и важно. У тебя никогда не горит от дедлайнов задница и ты подготавливаешь в своем темпе платформу для важных в будущем вещей. Так держать!')}
-else if (urgent>notUrgent && important>notImportant){console.log('Гуд. Квадрант срочно/важно - задница от дедлайнов иногда подгорает, но здорово, что ты рабоатешь по большей части именно над важными вещами')}
-else if (urgent>notUrgent && important<notImportant){console.log('Нууу, такое себе что большую часть времени ты делаешь срочные и совершенно не важные дела. Начерта?')}
-else if (urgent<notUrgent && important<notImportant){console.log('Ооох, ёмае! Тебе сровно нужно что-то в этой жизни менять! Большую часть времени ты делаешь срочные, но совершенно не важные штуки. СТОП!')};
-
-
-//рекомендосьен от чего в списке задач своих избавиться
-const goodToDelete ={};
-for (const bad in taskUrgency) { 
-    if (taskUrgency.hasOwnProperty(bad) && taskImportance.hasOwnProperty(bad)) { goodToDelete[bad] = taskUrgency[bad]; 
-    } 
-};
-let goodToDeleteString = JSON.stringify(Object.entries(goodToDelete).filter(([key, value])=>value===2).map (([key, value])=>key));
-
-alert('И выкинь из списка своих дел вот эти пункты! Как совершенно не важные и не срочные' +goodToDeleteString);
+onlyImportant=filtration(taskImportance, true);
+onlyNotImportant=filtration(taskImportance, false);
+onlyUrgent=filtration(taskUrgency, true);
+onlyNotUrgent=filtration(taskUrgency, false);
 
 
+//Разделение на квадранты
+
+const squareOne ={};
+const squareTwo ={};
+const squareThree ={};
+const squareFour ={};
+const c ={};
+ function toSquare(obj1, obj2, commonForBoth) {
+    for (let common in obj1) {if (obj1.hasOwnProperty(common)&&obj2.hasOwnProperty(common)) {commonForBoth[common]=obj1[common]};
+}
+return c
+ }
+ 
+ toSquare(onlyImportant, onlyUrgent, squareOne);
+ toSquare(onlyImportant, onlyNotUrgent, squareTwo);
+ toSquare(onlyNotImportant, onlyUrgent, squareThree);
+ toSquare(onlyNotImportant, onlyNotUrgent, squareFour);
+
+ //считаем кол-во дел в каждом квадранте
+ function count(obj) {
+  let countNumber = 0;
+  for (let prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
+      countNumber++;
+    }
+  }
+  return countNumber;
+}
+const squareOneCounted = count(squareOne);
+const squareTwoCounted = count(squareTwo); 
+const squareThreeCounted = count(squareThree);
+const squareFourCounted = count(squareFour);
+
+//итоги
+
+console.log('Задачек первого квадранта: ' +squareOneCounted);
+console.log('Задачек второго квадранта: ' +squareTwoCounted);
+console.log('Задачек третьего квадранта: ' +squareThreeCounted);
+console.log('Задачек четвертого квадранта: ' +squareFourCounted);
+
+console.log('1️⃣ Если у тебя больше задач из первого квадранта: Огонь! Ты больше всего работаешь в самом клевом и правильном квадранте не срочно и важно. У тебя никогда не горит от дедлайнов задница и ты подготавливаешь в своем темпе платформу для важных в будущем вещей. Так держать!')
+console.log('2️⃣ Если у тебя больше задач из второго квадранта: Гуд. Квадрант срочно/важно - задница от дедлайнов иногда подгорает, но здорово, что ты рабоатешь по большей части именно над важными вещами')
+console.log('3️⃣ Если у тебя больше задач из третьего квадранта: Нууу, такое себе что большую часть времени ты делаешь срочные и совершенно не важные дела. Начерта?')
+console.log('4️⃣ Если у тебя больше задач из четвертого квадранта: Ооох, ёмае! Тебе срочно нужно что-то в этой жизни менять! Большую часть времени ты делаешь срочные, но совершенно не важные штуки. СТОП! Удали их к чертям собачим из своего списка.')
